@@ -15,12 +15,12 @@ class BoardGame:
         self.green_zone = (3, 3)  # Green center zone
         self.forbidden_rows = [3]  # Forbidden rows for placement
         self.forbidden_cols = [3]  # Forbidden columns for placement
-        self.obstacles = [(0, 3), (6, 3)]  # Obstacles positions
+        self.obstacles = [(3, 0), (3, 6)]  # Obstacles positions
         self.player_pieces = {1: [], 2: []}  # Player pieces will be placed later
         self.current_player = 1
         self.placement_phase = True
         self.piece_counter = {1: 0, 2: 0}  # Track number of pieces placed per player
-        self.row_counts = {1: [0] * 7, 2: [0] * 7}  # Track pieces placed per row
+        self.column_counts = {1: [0] * 7, 2: [0] * 7}  # Track pieces placed per column
         self.scores = {1: 0, 2: 0}  # Track scores for each player
         self.winner = None
         self.selected_piece = None
@@ -38,12 +38,12 @@ class BoardGame:
     def is_valid_placement(self, x, y):
         if (x, y) in self.obstacles or (x == 3 or y == 3):
             return False  # Column and row 3 should remain unchanged
-        if self.current_player == 1 and (x < 0 or x > 2):
-            return False  # Player 1 can only use rows 0 to 2
-        if self.current_player == 2 and (x < 4 or x > 6):
-            return False  # Player 2 can only use rows 4 to 6
-        if self.row_counts[self.current_player][x] >= 2:
-            return False  # Limit of 2 pieces per row
+        if self.current_player == 1 and (y < 0 or y > 2):
+            return False  # Player 1 can only use columns 0 to 2
+        if self.current_player == 2 and (y < 4 or y > 6):
+            return False  # Player 2 can only use columns 4 to 6
+        if self.column_counts[self.current_player][y] >= 2:
+            return False  # Limit of 2 pieces per column
         return self.board[x, y] == 0
 
     def place_piece(self, x, y):
@@ -53,7 +53,7 @@ class BoardGame:
             self.player_pieces[self.current_player].append(piece)
             self.board[x, y] = self.current_player
             self.piece_counter[self.current_player] += 1
-            self.row_counts[self.current_player][x] += 1
+            self.column_counts[self.current_player][y] += 1
             self.history.append((np.copy(self.board), self.current_player, self.scores.copy(), self.piece_counter.copy(), self.winner, [[Piece(p.player, p.number, p.x, p.y) for p in pieces] for pieces in self.player_pieces.values()]))
 
             if self.piece_counter[1] == 6 and self.piece_counter[2] == 6:
