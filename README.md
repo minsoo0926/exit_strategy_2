@@ -1,8 +1,13 @@
 # exit_strategy_2
-대학전쟁2 출구전략2 게임 구현
+대학전쟁 2 출구전략 2 게임 구현
 
 룰 참고: https://youtu.be/TJcLhuuP5TE?si=O3M4dwSzlaBu2BqW
 
-preliminaries Python 3, Tkinter Library "python -m pip install tk" 후 실행
+preliminaries Python 3, Tkinter, numpy Library "python -m pip install tk numpy" 후 실행
 
 버그 발생시 haminsoo0926@gmail.com 으로 제보 주시면 감사하겠습니다.
+
+
+v1.0: 원본 형태로 게임 구현
+
+v1.1: undo 기능 구현 및 스코어보드에 플레이어 색상 표시
