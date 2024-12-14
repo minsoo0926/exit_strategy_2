@@ -24,6 +24,7 @@ class BoardGame:
         self.scores = {1: 0, 2: 0}  # Track scores for each player
         self.winner = None
         self.selected_piece = None
+        self.history = []  # History for undo functionality
         self.init_board()
 
     def init_board(self):
@@ -53,6 +54,7 @@ class BoardGame:
             self.board[x, y] = self.current_player
             self.piece_counter[self.current_player] += 1
             self.row_counts[self.current_player][x] += 1
+            self.history.append((np.copy(self.board), self.current_player, self.scores.copy(), self.piece_counter.copy(), self.winner, [[Piece(p.player, p.number, p.x, p.y) for p in pieces] for pieces in self.player_pieces.values()]))
 
             if self.piece_counter[1] == 6 and self.piece_counter[2] == 6:
                 self.placement_phase = False  # End placement phase
@@ -95,6 +97,8 @@ class BoardGame:
 
         dx, dy = direction
 
+        self.history.append((np.copy(self.board), self.current_player, self.scores.copy(), self.piece_counter.copy(), self.winner, [[Piece(p.player, p.number, p.x, p.y) for p in pieces] for pieces in self.player_pieces.values()]))
+
         while 0 <= x + dx < 7 and 0 <= y + dy < 7:
             nx, ny = x + dx, y + dy
             if self.board[nx, ny] in [-2, 1, 2]:  # Stop before obstacle or another piece
@@ -135,7 +139,13 @@ class BoardGame:
                 else:
                     directions.append(((dx, dy), (nx, ny)))
         return directions
-    
+
+    def undo(self):
+        if self.history:
+            state = self.history.pop()
+            self.board, self.current_player, self.scores, self.piece_counter, self.winner, restored_pieces = state
+            self.player_pieces = {1: restored_pieces[0], 2: restored_pieces[1]}
+            self.selected_piece = None  # Clear selected piece
 
 class GameApp:
     def __init__(self, root):
@@ -143,12 +153,17 @@ class GameApp:
         self.game = BoardGame()
         self.canvas = tk.Canvas(root, width=350, height=350, bg="white")
         self.canvas.grid(row=1, column=0, columnspan=3)
-        self.score_label = tk.Label(root, text="Player 1: 0 | Player 2: 0", font=("Arial", 14))
-        self.score_label.grid(row=0, column=0, columnspan=3)
+        self.score_label = [tk.Label(root, font=("Arial", 14)), tk.Label(root, font=("Arial", 14)), tk.Label(root, font=("Arial", 14))]
+        self.score_label[0].grid(row=0, column=0)
+        self.score_label[1].grid(row=0, column=1)
+        self.score_label[2].grid(row=0, column=2)
+        self.update_score_label()
         self.status_label = tk.Label(root, text="Player 1: Place your pieces", font=("Arial", 14))
         self.status_label.grid(row=2, column=0, columnspan=3)
         self.reset_button = tk.Button(root, text="Reset", command=self.reset_game)
         self.reset_button.grid(row=3, column=1)
+        self.undo_button = tk.Button(root, text="Undo", command=self.undo, state=tk.DISABLED)
+        self.undo_button.grid(row=3, column=2)  # Move to the bottom-right
         self.canvas.bind("<Button-1>", self.click_board)
         self.creator_label = tk.Label(root, text="제작자: 대학전쟁2 포항공대팀 하민수", font=("Arial", 10))
         self.creator_label.grid(row=4, column=0, columnspan=3)
@@ -174,17 +189,17 @@ class GameApp:
                     y * 50, x * 50, y * 50 + 50, x * 50 + 50, fill=color, outline="black"
                 )
 
-                for pieces in self.game.player_pieces.values():
-                    for piece in pieces:
-                        if piece.x == x and piece.y == y:
-                            self.canvas.create_text(
-                                y * 50 + 25, x * 50 + 25, text=str(piece.number), fill="white"
-                            )
+        for pieces in self.game.player_pieces.values():
+            for piece in pieces:
+                self.canvas.create_text(
+                    piece.y * 50 + 25, piece.x * 50 + 25, text=str(piece.number), fill="white"
+                )
 
-                if self.game.selected_piece == (x, y):
-                    self.canvas.create_rectangle(
-                        y * 50 + 5, x * 50 + 5, y * 50 + 45, x * 50 + 45, outline="yellow", width=3
-                    )
+        if self.game.selected_piece:
+            x, y = self.game.selected_piece
+            self.canvas.create_rectangle(
+                y * 50 + 5, x * 50 + 5, y * 50 + 45, x * 50 + 45, outline="yellow", width=3
+            )
 
     def draw_arrows(self, position, directions):
         x, y = position
@@ -206,6 +221,8 @@ class GameApp:
                 self.update_score_label()
                 self.status_label.config(text=f"Player {self.game.current_player}: Place your pieces")
                 self.draw_board()
+                if not self.game.placement_phase:
+                    self.undo_button.config(state=tk.NORMAL)
             else:
                 self.status_label.config(text=f"Player {self.game.current_player}: Invalid place")
 
@@ -226,14 +243,23 @@ class GameApp:
                         self.status_label.config(text=f"Player {self.game.current_player}'s turn")
                         self.draw_board()
                         return
-
+                    
     def reset_game(self):
         self.game = BoardGame()
         self.status_label.config(text="Player 1: Place your pieces")
+        self.undo_button.config(state=tk.DISABLED)
         self.draw_board()
 
     def update_score_label(self):
-        self.score_label.config(text=f"Player 1: {self.game.scores[1]} | Player 2: {self.game.scores[2]}")
+        self.score_label[0].config(text=f"Player 1: {self.game.scores[1]}", fg="blue")
+        self.score_label[1].config(text=f" | ", fg="black")
+        self.score_label[2].config(text=f"Player 2: {self.game.scores[2]}", fg="red")
+
+    def undo(self):
+        self.game.undo()
+        self.update_score_label()
+        self.status_label.config(text=f"Player {self.game.current_player}'s turn")
+        self.draw_board()
 
 if __name__ == "__main__":
     root = tk.Tk()
