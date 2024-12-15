@@ -6,6 +6,8 @@
 
 > 압축풀고 안에 exe파일 실행하면 됩니다
 
+**설치하면 windows defender에서 바이러스로 인식하는 것 같은데, defender 잠깐 끄시거나 파이썬 깔아서 코드를 직접 돌리시면 됩니다**
+
 ## Description
 룰 참고: https://youtu.be/TJcLhuuP5TE?si=O3M4dwSzlaBu2BqW
 
