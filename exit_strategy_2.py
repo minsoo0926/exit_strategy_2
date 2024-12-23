@@ -247,6 +247,7 @@ class GameApp:
     def reset_game(self):
         self.game = BoardGame()
         self.status_label.config(text="Player 1: Place your pieces")
+        self.update_score_label()
         self.undo_button.config(state=tk.DISABLED)
         self.draw_board()
 
