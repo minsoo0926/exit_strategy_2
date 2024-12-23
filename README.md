@@ -1,6 +1,10 @@
 # exit_strategy_2
 대학전쟁 2 출구전략 2 게임 구현
 
+## How to play
+replit.com 에 계정 생성, 파이썬 구동환경 생성한 후 소스코드 복사해서 실행합니다.   
+링크로 친구 초대해 멀티플레이도 가능합니다.
+
 ## Download
 실행파일 다운로드: https://github.com/minsoo0926/exit_strategy_2/releases/download/v1.2/Exit_Strategy_2_v1.2.zip
 
@@ -20,6 +24,5 @@ v1.0: 원본 형태로 게임 구현
 
 v1.1: undo 기능 구현 및 스코어보드에 플레이어 색상 표시
 
-v1.2: 편의성을 위해 각 플레이어 진영을 좌우로 변경
-
+v1.2: 편의성을 위해 각 플레이어 진영을 좌우로 변경   
 v1.2.1: 게임 종료 후 reset 시 점수 초기화 안되던 문제 해결
